@@ -61,3 +61,18 @@ function Hero() {
         gsap.set(select('[data-blink="right"]'), { svgOrigin: '604 366' });
         const blink = gsap.timeline({ repeat: -1, repeatDelay: 4.2, delay: 2.6 });
         blink.to(select('[data-blink]'), { scaleY: .06, duration: .09, ease: 'power2.in' })
+          .to(select('[data-blink]'), { scaleY: 1, duration: .15, ease: 'power2.out' });
+      }
+      if (reduced) {
+        timeline.progress(1);
+      } else {
+        ScrollTrigger.create({
+          id: 'catalyst-transformation',
+          trigger: scene.current,
+          pin: select('.hero-pinned')[0],
+          animation: timeline,
+          start: () => `top ${document.querySelector('.navigation').offsetHeight}px`,
+          end: () => `+=${Math.round(innerHeight * (innerWidth < 651 ? 1.3 : 1.65))}`,
+          scrub: true,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
