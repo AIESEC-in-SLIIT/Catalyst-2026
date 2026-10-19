@@ -18,3 +18,13 @@
 .hero-progress{position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--cream);transform-origin:left;z-index:8}
 .hero-scroll-scene.reduced-scene{height:calc(100svh - var(--nav))}
 .reduced-scene .hero-pinned{position:relative;height:100%;min-height:600px}
+@media(max-width:650px){.hero-scroll-scene{height:210svh}.hero-pinned .warrior-motion{width:220%;bottom:-1%}.hero-pinned .hero-footnote{bottom:20px}.reduced-scene .hero-pinned{min-height:0}}
+@media(max-height:700px) and (min-width:651px){.hero-pinned .hero-heading{padding-top:18px}.hero-pinned .hero-japanese{font-size:28px}.hero-pinned .hero-caption{margin-bottom:10px}.hero-pinned .title-top{font-size:24vh}.hero-pinned .title-bottom{font-size:30vh}.hero-pinned .warrior-motion{width:min(85%,110vh);bottom:-20%}}
+/* Keep the reference's framed header visible above the pinned illustration. */
+.navigation{position:sticky;top:0}
+.hero-scroll-scene .hero-pinned{top:var(--nav);height:calc(100svh - var(--nav))}
+.hero-stage::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:6;opacity:.045;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath fill='%23fff' filter='url(%23n)' opacity='.6' d='M0 0h180v180H0z'/%3E%3C/svg%3E")}
+
+/* ScrollTrigger owns pinning, spacing, and background text parallax. */
+.gsap-scene{height:auto!important}
+.gsap-scene .hero-pinned{position:relative;top:auto;height:calc(100svh - var(--nav));min-height:0;max-height:none}
