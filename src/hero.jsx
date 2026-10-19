@@ -91,3 +91,18 @@ function Hero() {
         <div className="hero-stage">
           <div className="hero-heading">
             <div><p className="hero-japanese" lang="ja">覚醒の時</p><p className="eyebrow hero-caption">THE TIME TO AWAKEN</p></div>
+            <h1 id="hero-title" className="motion-title"><span className="title-top">IGNITE</span><span className="title-bottom">CATALYST</span></h1>
+          </div>
+          <div className="warrior-motion"><Character /></div>
+          <div className="drifting-leaves" aria-hidden="true">
+            {[0, 1, 2, 3, 4, 5].map(index => <div key={index} className={`leaf-flight leaf-flight-${index}`}><svg viewBox="0 0 80 110"><path d="M5 103C-6 63 10 25 64 5L67 31 78 24C85 68 64 94 31 98L12 107 22 86Z" fill="currentColor"/></svg></div>)}
+          </div>
+          <div className="hero-footnote"><span>LEADERSHIP DEVELOPMENT SEMINAR<br/>AIESEC IN SLIIT</span><a href="#about" className="scroll-link">{reduced ? 'THE GATHERING' : 'SCROLL TO AWAKEN'} <span>↓</span></a><span className="hero-edition">A NEW CHAPTER.<br/>THE SAME FEARLESS SPIRIT.</span></div>
+        </div>
+        <div className="hero-progress" aria-hidden="true"/>
+      </div>
+    </section>
+    {!systemReduced && <button className="motion-toggle" type="button" aria-label={manualReduced ? 'Enable scroll animation' : 'Show static samurai'} aria-pressed={manualReduced} onClick={() => setManualReduced(value => !value)}><span aria-hidden="true">{manualReduced ? '▷' : 'Ⅱ'}</span></button>}
+  </>;
+}
+createRoot(document.getElementById('hero-root')).render(<Hero />);
