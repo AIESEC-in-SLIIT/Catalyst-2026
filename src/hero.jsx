@@ -30,3 +30,19 @@ function Hero() {
       select('[data-morph]').forEach(path => {
         timeline.to(path, {
           morphSVG: { shape: path.dataset.morph, shapeIndex: 'auto' },
+          duration: Number(path.dataset.duration),
+        }, Number(path.dataset.at));
+      });
+      timeline
+        .to(select('[data-part="helmet-base"]'), { fill: '#201b13', duration: .24 }, .17)
+        .to(select('[data-face-detail]'), { opacity: 0, duration: .22 }, .2)
+        .to(select('[data-horn-clip]'), {
+          morphSVG: 'M550 340Q90 355 270 -20L830 -20Q1010 355 550 340Z', duration: .43,
+        }, .27)
+        .fromTo(select('[data-crest]'), { scale: .65, svgOrigin: '550 200' }, { scale: 1, opacity: 1, duration: .24 }, .43)
+        .to(select('#evolving-face'), { attr: { y1: 320, y2: 475 }, duration: .4 }, .24)
+        .to(select('[data-part="jaw"]'), { fill: '#c90038', duration: .3 }, .34)
+        .to(select('[data-nostrils], [data-chin-line]'), { opacity: 1, duration: .2 }, .46)
+        .to(select('[data-teeth-clip]'), { attr: { height: 40 }, duration: .26 }, .44)
+        .to(select('[data-robe-flowers]'), { opacity: 0, duration: .22 }, .34)
+        .to(select('[data-part="robe"]'), { fill: '#c90038', duration: .38 }, .34)
