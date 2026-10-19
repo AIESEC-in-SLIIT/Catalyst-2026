@@ -14,3 +14,19 @@ function Hero() {
   const [manualReduced, setManualReduced] = useState(false);
   const reduced = systemReduced || manualReduced;
   useEffect(() => {
+    const media = matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setSystemReduced(media.matches);
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
+
+  useLayoutEffect(() => {
+    let active = true;
+    const ctx = gsap.context(() => {
+      const select = gsap.utils.selector(scene.current);
+      const timeline = gsap.timeline({ paused: true, defaults: { ease: 'sine.inOut' } });
+      // A normalized, centralized timeline: all overlapping stages reverse exactly.
+      timeline.to({}, { duration: 1 }, 0);
+      select('[data-morph]').forEach(path => {
+        timeline.to(path, {
+          morphSVG: { shape: path.dataset.morph, shapeIndex: 'auto' },
