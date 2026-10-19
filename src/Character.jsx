@@ -37,3 +37,16 @@ export default function Character() {
       <Shape name="face" from="M425 271Q550 214 675 271L684 401 657 484 597 565H503L443 484 416 401Z" to="M443 330Q550 330 657 330L671 414Q676 449 641 462L594 475H506L459 462Q424 449 429 414Z" at=".24" duration=".4" fill="url(#evolving-face)"/>
       <path data-face-detail d="M485 262Q550 299 615 262M487 282Q550 315 613 282M440 386Q459 440 514 391M660 386Q641 440 586 391" stroke="#201b13" strokeWidth="1.8"/>
       <Shape name="left-brow" from="M436 320 524 340V358L490 345 436 339Z" to="M447 343Q479 332 522 352L530 376Q528 391 510 390H499Q487 407 467 400 448 397 449 379Z" at=".25" duration=".35" fill="#201b13"/>
+      <Shape name="right-brow" from="M664 320 576 340V358L610 345 664 339Z" to="M653 343Q621 332 578 352L570 376Q572 391 590 390H601Q613 407 633 400 652 397 651 379Z" at=".25" duration=".35" fill="#201b13"/>
+      <g data-blink="left">
+      <Shape name="left-eye" from="M460 362 496 352 530 374 493 383Z" to="M470 357Q494 345 521 368 495 385 470 357Z" at=".27" duration=".3" fill="#f1eadf"/>
+        <ellipse cx="496" cy="366" rx="10" ry="13" fill="#201b13"/>
+      </g>
+      <g data-blink="right">
+      <Shape name="right-eye" from="M640 362 604 352 570 374 607 383Z" to="M630 357Q606 345 579 368 605 385 630 357Z" at=".27" duration=".3" fill="#f1eadf"/>
+        <ellipse cx="604" cy="366" rx="10" ry="13" fill="#201b13"/>
+      </g>
+      <Shape name="nose" from="M546 375 533 435 550 442 567 435 553 375Z" to="M544 372H556L562 401Q580 407 579 421 575 438 550 437 525 438 521 421 520 407 538 401Z" at=".3" duration=".3" fill="#201b13"/>
+      <path data-nostrils opacity="0" d="M535 416Q538 425 547 420V428Q531 432 529 421ZM565 416Q562 425 553 420V428Q569 432 571 421Z" fill="#c90038"/>
+      <Shape name="jaw" from="M503 548Q550 550 597 548L597 554Q550 574 503 554Z" to="M482 445Q482 430 502 430H598Q618 430 618 450V504Q616 522 596 534L583 546Q578 550 566 550H514Q504 550 502 540L497 533Q480 526 480 508Z" at=".34" duration=".36" fill="#f1eadf"/>
+      <Shape name="mouth" from="M481 489Q507 492 523 480Q536 472 550 480Q564 472 577 480Q593 492 619 489L619 495Q593 498 576 487Q564 480 550 487Q536 480 524 487Q507 498 481 495Z" to="M478 458Q478 432 503 432H597Q622 432 622 458V479Q622 499 604 498L574 492Q550 487 526 492L496 498Q478 500 478 481Z" at=".34" duration=".36" fill="#201b13"/>
