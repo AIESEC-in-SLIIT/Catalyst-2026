@@ -76,3 +76,28 @@ function installSlices() {
         try { destination = document.getElementById(decodeURIComponent(url.hash.slice(1))); } catch { /* Native navigation handles malformed fragments. */ }
         if (destination) {
           history.pushState(null, '', url.hash);
+          destination.scrollIntoView({ behavior: 'smooth' });
+          const oldTabindex = destination.getAttribute('tabindex');
+          destination.setAttribute('tabindex', '-1');
+          destination.focus({ preventScroll: true });
+          if (oldTabindex === null) destination.removeAttribute('tabindex');
+          else destination.setAttribute('tabindex', oldTabindex);
+          return;
+        }
+      }
+      location.assign(url.href);
+    } });
+    timeline.fromTo(sword, { x: swordWidth * 1.2, y: -bounds.height * 1.2, rotation: -10, opacity: 0, scale: .92 }, { x: -swordWidth * 1.2, y: bounds.height * 1.2, rotation: 10, opacity: 1, scale: 1, duration: .27, ease: 'power3.in' }, 0)
+      .fromTo(slash, { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 1, duration: .07, ease: 'power4.out' }, .09)
+      .fromTo(impact, { scale: .15, opacity: .95 }, { scale: 2.8, opacity: 0, duration: .34, ease: 'power2.out' }, .105)
+      .to(halves[0], { x: -16, y: -10, rotation: -2.5, duration: .14, ease: 'power2.out' }, .115)
+      .to(halves[1], { x: 16, y: 10, rotation: 2.5, duration: .14, ease: 'power2.out' }, .115)
+      .to(slash, { opacity: 0, duration: .18 }, .14)
+      .to(sword, { opacity: 0, duration: .11 }, .2)
+      .to(halves, { x: 0, y: 0, rotation: 0, duration: .22, ease: 'back.out(1.5)' }, .24);
+  };
+  document.addEventListener('click', handleClick);
+  return () => { document.removeEventListener('click', handleClick); active.forEach(cleanup => cleanup()); };
+}
+const dispose = installSlices();
+if (import.meta.hot) import.meta.hot.dispose(dispose);
