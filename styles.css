@@ -47,3 +47,12 @@
 .leaf-flight-4{animation-delay:-15s;animation-duration:23s;--leaf-y:30vh;--leaf-fall:35vh;width:16px;color:var(--cream);opacity:.3}
 .leaf-flight-5{animation-delay:-9s;animation-duration:16s;--leaf-y:70vh;--leaf-fall:5vh;width:40px}
 .leaf-flight:nth-child(even) svg{animation-delay:-3s;animation-direction:alternate-reverse}
+@keyframes leaf-drift{from{transform:translate(-100px,var(--leaf-y))}to{transform:translate(100vw,calc(var(--leaf-y) + var(--leaf-fall)))}}
+@keyframes leaf-tumble{0%{transform:rotate(-25deg) rotateY(0deg) translateY(-12px)}50%{transform:rotate(20deg) rotateY(60deg) translateY(12px)}100%{transform:rotate(65deg) rotateY(-20deg) translateY(-8px)}}
+.slice-effect{position:fixed;z-index:1000;pointer-events:none;overflow:visible}.slice-effect *{pointer-events:none!important}
+.sword-strike{position:absolute;z-index:4;filter:drop-shadow(0 2px 2px #201b13b0) drop-shadow(0 0 8px #f1eadf);transform-origin:80% 50%;will-change:transform,opacity}.sword-strike svg{display:block;width:100%;height:100%;overflow:visible}
+.slice-stroke{position:absolute;z-index:3;left:-35%;top:50%;height:3px;width:170%;background:linear-gradient(90deg,transparent 0%,#f1eadf 42%,#fff 50%,#f1eadf 58%,transparent 100%);box-shadow:0 0 7px #f1eadf;transform:rotate(-19deg);transform-origin:center;will-change:transform,opacity}
+.slice-impact{position:absolute;z-index:2;left:50%;top:50%;width:34px;height:34px;border:2px solid #fffef7;border-radius:50%;box-shadow:0 0 14px #f1eadf, inset 0 0 9px #f1eadf;transform:translate(-50%,-50%);will-change:transform,opacity}
+.gsap-scene:not(.reduced-scene) .hero-heading{will-change:transform}
+@media(prefers-reduced-motion:reduce){.drifting-leaves{display:none}}
+.reduced-scene .drifting-leaves{display:none}
