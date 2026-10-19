@@ -46,3 +46,18 @@ function Hero() {
         .to(select('[data-teeth-clip]'), { attr: { height: 40 }, duration: .26 }, .44)
         .to(select('[data-robe-flowers]'), { opacity: 0, duration: .22 }, .34)
         .to(select('[data-part="robe"]'), { fill: '#c90038', duration: .38 }, .34)
+        .to(select('[data-neck-clip]'), { attr: { rx: 230, ry: 245 }, duration: .36 }, .43)
+        .fromTo(select('[data-neck-line]'), { opacity: 0 }, { opacity: 1, duration: .18, stagger: .06 }, .53)
+        .to(select('#neck-shadow stop:first-child'), { attr: { 'stop-color': '#201b13' }, duration: .32 }, .4)
+        .to(select('[data-character-root]'), { scale: 1.04, svgOrigin: '550 420', duration: .28 }, .66)
+        .to(select('.hero-progress'), { scaleX: 1, duration: 1, ease: 'none' }, 0);
+
+      if (!reduced) {
+        timeline.to(select('.hero-heading'), {
+          y: () => -select('.hero-pinned')[0].offsetHeight * .24,
+          duration: 1, ease: 'none',
+        }, 0);
+        gsap.set(select('[data-blink="left"]'), { svgOrigin: '496 366' });
+        gsap.set(select('[data-blink="right"]'), { svgOrigin: '604 366' });
+        const blink = gsap.timeline({ repeat: -1, repeatDelay: 4.2, delay: 2.6 });
+        blink.to(select('[data-blink]'), { scaleY: .06, duration: .09, ease: 'power2.in' })
