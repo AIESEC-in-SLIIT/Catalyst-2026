@@ -76,3 +76,18 @@ function Hero() {
           scrub: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
+        });
+      }
+      document.fonts.ready.then(() => { if (active) ScrollTrigger.refresh(); });
+    }, scene);
+    return () => { active = false; ctx.revert(); };
+  }, [reduced]);
+
+  return <>
+    <section ref={scene} className={`hero-scroll-scene gsap-scene${reduced ? ' reduced-scene motion-paused' : ''}`} aria-labelledby="hero-title">
+      <div className="hero hero-pinned">
+        <div className="rail rail-left" aria-hidden="true"><span>01 / 02</span><span>AIESEC IN SLIIT</span><span>LEADERS ARE FORGED</span></div>
+        <div className="rail rail-right" aria-hidden="true"><span>2026 EDITION</span><span>IGNITE THE LEADER WITHIN</span><span>CATALYST · SRI LANKA</span></div>
+        <div className="hero-stage">
+          <div className="hero-heading">
+            <div><p className="hero-japanese" lang="ja">覚醒の時</p><p className="eyebrow hero-caption">THE TIME TO AWAKEN</p></div>
