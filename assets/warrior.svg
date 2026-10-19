@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 850" fill="none">
+<defs>
+ <linearGradient id="face" x1="550" y1="260" x2="550" y2="595" gradientUnits="userSpaceOnUse"><stop offset=".33" stop-color="#c90038"/><stop offset=".67" stop-color="#e27c96"/><stop offset=".94" stop-color="#f1eadf"/></linearGradient>
+ <pattern id="weave" width="74" height="110" patternUnits="userSpaceOnUse" patternTransform="rotate(-20)"><path d="M0 0C0 55 74 55 74 110M74 0C74 55 0 55 0 110M37 0V110" stroke="#f1eadf" stroke-opacity=".48" stroke-width="1.4"/></pattern>
+ <g id="flower" fill="#c90038"><path d="M0-6C-29-22-12-43 0-28 12-43 29-22 0-6Z"/><path d="M0-6C-29-22-12-43 0-28 12-43 29-22 0-6Z" transform="rotate(72)"/><path d="M0-6C-29-22-12-43 0-28 12-43 29-22 0-6Z" transform="rotate(144)"/><path d="M0-6C-29-22-12-43 0-28 12-43 29-22 0-6Z" transform="rotate(216)"/><path d="M0-6C-29-22-12-43 0-28 12-43 29-22 0-6Z" transform="rotate(288)"/><circle r="4" fill="#f1eadf"/></g>
+ <clipPath id="robe"><path d="M398 484 255 565 5 760V850H1095V760L845 565 702 484Z"/></clipPath>
+</defs>
+<!-- The silhouette is kept in independent vector layers for crisp scaling. -->
+<path d="M398 484 255 565 5 760V850H1095V760L845 565 702 484Z" fill="#f1eadf"/>
+<g clip-path="url(#robe)"><use href="#flower" transform="translate(235 611) scale(1.4)"/><use href="#flower" transform="translate(106 729) scale(1.6)"/><use href="#flower" transform="translate(326 758) scale(1.4)"/><use href="#flower" transform="translate(71 846) scale(1.5)"/><use href="#flower" transform="translate(865 611) scale(1.4)"/><use href="#flower" transform="translate(994 729) scale(1.6)"/><use href="#flower" transform="translate(774 758) scale(1.4)"/><use href="#flower" transform="translate(1029 846) scale(1.5)"/></g>
+<path d="M398 484 284 554 477 850H623L816 554 702 484 550 686Z" fill="#201b13"/>
+<path d="M398 484 284 554 477 850H623L816 554 702 484 550 686Z" fill="url(#weave)"/>
+<path d="m418 512 132 179 132-179-41 9-91 102-91-102Z" fill="#c90038"/>
+<path d="m495 636 55 84 55-84Z" fill="#f1eadf"/>
+<!-- Neck and sculpted face -->
+<path d="M466 460H634V561L601 597H499L466 561Z" fill="#201b13"/>
+<path d="M425 271Q550 214 675 271L684 401 657 484 597 565H503L443 484 416 401Z" fill="url(#face)"/>
+<path d="M427 356C386 335 398 416 430 428M673 356C714 335 702 416 670 428" fill="url(#face)"/>
+<!-- Hair, top knot, and lacquered crown -->
+<path d="M418 366C390 280 420 223 487 198L550 188 613 198C680 223 710 280 682 366L669 371 669 313Q640 301 636 242L550 221 464 242Q460 301 431 313L431 371Z" fill="#201b13"/>
+<path d="M474 249Q550 278 626 249L623 224Q550 190 477 224Z" fill="#c90038"/>
+<path d="M514 196 505 73 550 88 595 73 586 196 550 208Z" fill="#201b13"/>
+<path d="M485 262Q550 299 615 262M487 282Q550 315 613 282" stroke="#201b13" stroke-width="2.6"/>
+<!-- Brows and eyes -->
+<path d="m436 320 88 20v18l-34-13-54-6ZM664 320l-88 20v18l34-13 54-6Z" fill="#201b13"/>
+<path d="m442 362 38-10 36 22-39 9ZM658 362l-38-10-36 22 39 9Z" fill="#f1eadf"/>
+<ellipse cx="478" cy="366" rx="13" ry="15" fill="#201b13"/><ellipse cx="622" cy="366" rx="13" ry="15" fill="#201b13"/>
+<path d="M440 386Q459 440 514 391M660 386Q641 440 586 391" stroke="#201b13" stroke-width="1.8"/>
+<path d="m546 375-13 80 34-8-14-72Z" fill="#201b13"/>
+<path d="M481 489C520 493 517 465 550 480 583 465 580 493 619 489" stroke="#201b13" stroke-width="8"/>
+<path d="m526 504 24-9 24 9-24 7Z" fill="#c90038"/>
+<path d="M541 526H559V568H541Z" fill="#201b13"/>
+<path d="M500 565H600L584 588H516Z" fill="#201b13"/>
+</svg>
