@@ -38,3 +38,12 @@
 
 /* Ambient motion is independent of the scroll-scrubbed transformation. */
 .drifting-leaves{position:absolute;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+.leaf-flight{position:absolute;left:0;top:0;width:clamp(26px,5vw,78px);color:var(--red);animation:leaf-drift 15s linear infinite;will-change:transform}
+.leaf-flight svg{display:block;width:100%;height:auto;animation:leaf-tumble 5s ease-in-out infinite alternate;transform-origin:50% 60%}
+.leaf-flight-0{animation-delay:-4s;--leaf-y:18vh;--leaf-fall:60vh}
+.leaf-flight-1{animation-delay:-11s;animation-duration:19s;--leaf-y:38vh;--leaf-fall:32vh}
+.leaf-flight-2{animation-delay:-7s;animation-duration:17s;--leaf-y:58vh;--leaf-fall:14vh}
+.leaf-flight-3{animation-delay:-1s;animation-duration:21s;--leaf-y:8vh;--leaf-fall:65vh;width:24px;color:var(--cream);opacity:.35}
+.leaf-flight-4{animation-delay:-15s;animation-duration:23s;--leaf-y:30vh;--leaf-fall:35vh;width:16px;color:var(--cream);opacity:.3}
+.leaf-flight-5{animation-delay:-9s;animation-duration:16s;--leaf-y:70vh;--leaf-fall:5vh;width:40px}
+.leaf-flight:nth-child(even) svg{animation-delay:-3s;animation-direction:alternate-reverse}
