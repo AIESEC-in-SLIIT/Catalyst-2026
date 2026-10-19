@@ -28,3 +28,13 @@
 /* ScrollTrigger owns pinning, spacing, and background text parallax. */
 .gsap-scene{height:auto!important}
 .gsap-scene .hero-pinned{position:relative;top:auto;height:calc(100svh - var(--nav));min-height:0;max-height:none}
+.gsap-scene .warrior-motion{width:104%;max-width:1250px;bottom:-3%;transform:translateX(-50%)}
+.gsap-scene .samurai-svg{transform-origin:50% 49.4118%;will-change:transform}
+.gsap-scene .hero-progress{transform:scaleX(0)}
+.gsap-scene .scroll-link span{animation:none}
+.gsap-scene .motion-title>span{will-change:auto}
+@media(max-width:650px){.gsap-scene .warrior-motion{width:220%;bottom:-1%}}
+@media(max-height:700px) and (min-width:651px){.gsap-scene .warrior-motion{width:min(95%,125vh);bottom:-22%}}
+
+/* Ambient motion is independent of the scroll-scrubbed transformation. */
+.drifting-leaves{position:absolute;inset:0;z-index:3;pointer-events:none;overflow:hidden}
