@@ -23,6 +23,10 @@ npm run build
 
 Upload the contents of `dist/` to a static host. Both pages use relative asset paths.
 
+For GitHub Pages, set **Settings → Pages → Build and deployment → Source** to
+**GitHub Actions**. The workflow builds and deploys `dist/` whenever the
+`production` branch is pushed, and can also be run manually from Actions.
+
 ## Content
 
 Jōkamachi intentionally contains only its title and shared navigation. No products, prices, ordering, or payment integration have been added. The homepage does not announce an unconfirmed 2026 date or venue.
