@@ -44,7 +44,8 @@ let motion;
 const leafBursts = new Map();
 const petalHost = stage.querySelector('.market-petals');
 const burstArtwork = petalHost.querySelector('svg');
-let previousBurstScroll = window.scrollY;
+let previousWheelAngle = null;
+let previousWheelTime = 0;
 let burstCredit = 0;
 let burstSequence = 0;
 
@@ -87,13 +88,14 @@ function layout() {
   stage.style.setProperty('--card-height', `${height}px`);
   stage.style.setProperty('--pivot', `${pivot}px`);
   stage.style.setProperty('--hub-top', `${height + (mobile ? 65 : 72)}px`);
+  stage.style.setProperty('--orbit-radius', `${radius}px`);
   stage.style.setProperty('--guide-size', `${radius * 1.26}px`);
   stage.style.setProperty('--guide-top', `${pivot - radius * .63}px`);
   stage.style.height = `${height + (mobile ? 265 : 280)}px`;
   cards.forEach((card, slot) => {
     const angle = slot * step;
     const radians = angle * Math.PI / 180;
-    gsap.set(card, { xPercent: -50, yPercent: -50, x: Math.sin(radians) * radius, y: -Math.cos(radians) * radius, rotation: angle });
+    gsap.set(card, { xPercent: -50, yPercent: -50, x: Math.sin(radians) * radius, y: -Math.cos(radians) * radius, rotation: 0 });
   });
   render();
 }
@@ -114,10 +116,13 @@ function updateProduct(index) {
 }
 
 function render() {
+  emitWheelLeaves();
   setRotation(state.angle);
   const topSlot = mod(Math.round(-state.angle / step), slots);
   updateProduct(topSlot % products.length);
   cards.forEach((card, slot) => {
+    // Keep each card upright as the carousel turns.
+    gsap.set(card, { rotation: -state.angle });
     const degrees = mod(slot * step + state.angle + 180, 360) - 180;
     const visible = Math.abs(degrees) < 95;
     const visibility = visible ? 'visible' : 'hidden';
@@ -221,13 +226,15 @@ listen(stage, 'click', event => {
   if (performance.now() < suppressClickUntil) { event.preventDefault(); event.stopImmediatePropagation(); }
 }, { capture: true });
 listen(stage, 'dragstart', event => event.preventDefault());
-// Horizontal trackpad movement rotates the fan; vertical gestures keep native page scrolling.
+// Wheel and trackpad movement turn the carousel while the pointer is over it.
 listen(stage, 'wheel', event => {
-  if (Math.abs(event.deltaX) <= Math.abs(event.deltaY) || Math.abs(event.deltaX) < 1) return;
+  const distance = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+  if (Math.abs(distance) < 1) return;
   event.preventDefault();
   animation?.kill(); animation = null;
   lastInteraction = performance.now();
-  state.angle -= event.deltaX * .07;
+  const pixels = distance * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? stage.clientHeight : 1);
+  state.angle -= Math.max(-120, Math.min(120, pixels)) * .18;
   render();
 }, { passive: false });
 
@@ -317,26 +324,30 @@ function emitScrollLeaf(speed, scrollDirection) {
     .to(leaf, { opacity: .8, duration: .3 }, 0)
     .to(leaf, { opacity: 0, duration: 1.1 }, duration - 1.1);
 }
-function updateScrollBursts(delta) {
-  const scrollPosition = window.scrollY;
-  const distance = scrollPosition - previousBurstScroll;
-  previousBurstScroll = scrollPosition;
-  if (!inView || document.hidden || paused || reducedMotion.matches || dialog.open || delta > 100) {
-    burstCredit = 0;
+function emitWheelLeaves() {
+  const now = performance.now();
+  if (previousWheelAngle === null) {
+    previousWheelAngle = state.angle;
+    previousWheelTime = now;
     return;
   }
-  const seconds = Math.max(delta, 1) / 1000;
-  const speed = Math.abs(distance) / seconds;
-  // Emission rises with actual scroll velocity in either direction, then stops at rest.
-  if (speed < 80) return;
-  burstCredit = Math.min(3, burstCredit + Math.min(24, speed / 65) * seconds);
+  const angleDelta = state.angle - previousWheelAngle;
+  const elapsed = Math.max(16, now - previousWheelTime);
+  previousWheelAngle = state.angle;
+  previousWheelTime = now;
+  if (!inView || document.hidden || paused || reducedMotion.matches || dialog.open || Math.abs(angleDelta) < .12) {
+    if (!inView || document.hidden || paused || reducedMotion.matches || dialog.open) burstCredit = 0;
+    return;
+  }
+  const speed = Math.abs(angleDelta) / elapsed * 1000;
+  // A turn releases petals; a faster turn releases more.
+  burstCredit = Math.min(5, burstCredit + Math.abs(angleDelta) * (.055 + Math.min(speed, 500) * .00016));
   while (burstCredit >= 1) {
-    emitScrollLeaf(speed, Math.sign(distance));
+    emitScrollLeaf(speed, Math.sign(angleDelta));
     burstCredit -= 1;
   }
 }
 function tick(_time, delta) {
-  updateScrollBursts(delta);
   updatePetalScroll(delta);
   if (!inView || document.hidden || paused || hovering || dragging || animation || dialog.open || stage.contains(document.activeElement) || performance.now() - lastInteraction < 3000) return;
   state.angle -= Math.min(delta, 50) * .0025;
