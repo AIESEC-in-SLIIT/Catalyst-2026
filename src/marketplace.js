@@ -46,6 +46,8 @@ let motion;
 const leafBursts = new Map();
 const petalHost = stage.querySelector('.market-petals');
 const burstArtwork = petalHost.querySelector('svg');
+const flyingLeaves = [...petalHost.querySelectorAll('.leaf-flight')];
+const leafCardOffsets = [0, 0, -1, 1, -2, 2];
 let previousWheelAngle = null;
 let previousWheelTime = 0;
 let burstCredit = 0;
@@ -80,6 +82,30 @@ for (let slot = 0; slot < slots; slot++) {
 const cards = [...wheel.children];
 const setRotation = gsap.quickSetter(wheel, 'rotation', 'deg');
 
+function cardOrigin(offset) {
+  const slot = mod(Math.round(-state.angle / step) + offset, slots);
+  const cardBounds = cards[slot].getBoundingClientRect();
+  const stageBounds = stage.getBoundingClientRect();
+  return {
+    x: cardBounds.left + cardBounds.width / 2 - stageBounds.left,
+    y: cardBounds.top + cardBounds.height / 2 - stageBounds.top,
+  };
+}
+
+function setLeafOrigin(leaf, offset) {
+  const { x, y } = cardOrigin(offset);
+  leaf.style.left = `${x}px`;
+  leaf.style.top = `${y}px`;
+}
+
+flyingLeaves.forEach((leaf, index) => {
+  listen(leaf, 'animationiteration', event => {
+    if (event.target === leaf && event.animationName === 'market-petal-flight') {
+      setLeafOrigin(leaf, leafCardOffsets[index]);
+    }
+  });
+});
+
 function layout() {
   const mobile = stage.clientWidth <= 750;
   const width = mobile ? Math.min(200, stage.clientWidth * .47) : Math.min(275, stage.clientWidth * .205);
@@ -100,6 +126,7 @@ function layout() {
     gsap.set(card, { xPercent: -50, yPercent: -50, x: Math.sin(radians) * radius, y: -Math.cos(radians) * radius, rotation: 0 });
   });
   render();
+  flyingLeaves.forEach((leaf, index) => setLeafOrigin(leaf, leafCardOffsets[index]));
 }
 
 function updateProduct(index) {
@@ -334,6 +361,7 @@ function emitScrollLeaf(speed, scrollDirection) {
   leaf.className = 'market-scroll-leaf';
   leaf.append(burstArtwork.cloneNode(true));
   petalHost.append(leaf);
+  setLeafOrigin(leaf, leafCardOffsets[burstSequence % leafCardOffsets.length]);
   const side = burstSequence++ % 2 ? 1 : -1;
   const energy = Math.min(speed / 1800, 1);
   const duration = 5.8 - energy * 2;
