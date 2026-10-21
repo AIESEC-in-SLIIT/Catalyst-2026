@@ -1,5 +1,6 @@
 import { gsap } from 'gsap';
 import './interactions.js';
+import './platform/embed.jsx';
 import { installShopMotion } from './shop-motion.js';
 import wristbands from '../assets/merch/wristbands.svg';
 import regular from '../assets/merch/regular.svg';
@@ -15,6 +16,7 @@ const products = [
   { name: 'STICKER PACK', tab: 'STICKERS', fit: 'LEAVE YOUR MARK.', image: stickers, background: '#d4b99b', ink: '#201b13', description: 'A collection of Catalyst-inspired marks for the things you take everywhere. Give your notebook, laptop, or everyday essentials a little character.' },
   { name: 'BUCKET HAT', tab: 'BUCKET HAT', fit: 'TOP OFF YOUR NEXT CHAPTER.', image: hat, background: '#c90038', ink: '#f1eadf', description: 'A finishing touch for your Catalyst collection. Take the Catalyst spirit beyond the conference and into your next adventure.' },
 ];
+const productSlugs = ['wristbands', 'regular-tee', 'oversized-tee', 'sticker-pack', 'bucket-hat'];
 const stage = document.querySelector('.orbit-stage');
 const wheel = document.querySelector('.orbit-wheel');
 const tabs = document.querySelector('.product-tabs');
@@ -121,7 +123,8 @@ function render() {
   const topSlot = mod(Math.round(-state.angle / step), slots);
   updateProduct(topSlot % products.length);
   cards.forEach((card, slot) => {
-    // Keep each card upright as the carousel turns.
+    // Counter-rotate the cards against the wheel so the carousel turns while
+    // product artwork and type remain upright.
     gsap.set(card, { rotation: -state.angle });
     const degrees = mod(slot * step + state.angle + 180, 360) - 180;
     const visible = Math.abs(degrees) < 95;
@@ -144,7 +147,8 @@ function rotateTo(angle, velocity = 0) {
     animation = null;
     return;
   }
-  animation = gsap.to(state, { angle, duration: Math.min(1.3, .8 + Math.abs(velocity) * .002), ease: 'power3.out', onUpdate: render, onComplete: () => { animation = null; } });
+  const distance = Math.abs(angle - state.angle);
+  animation = gsap.to(state, { angle, duration: Math.min(.8, Math.max(.28, .25 + distance / step * .28)), ease: 'power2.out', onUpdate: render, onComplete: () => { animation = null; } });
 }
 function selectProduct(index) {
   const currentSlot = -state.angle / step;
@@ -185,25 +189,38 @@ listen(reducedMotion, 'change', () => {
 });
 listen(stage, 'pointerenter', event => { if (event.pointerType === 'mouse') hovering = true; });
 listen(stage, 'pointerleave', () => { hovering = false; });
+function pointerAngle(event) {
+  const rect = stage.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + Number.parseFloat(stage.style.getPropertyValue('--pivot'));
+  return Math.atan2(event.clientX - centerX, centerY - event.clientY) * 180 / Math.PI;
+}
 listen(stage, 'pointerdown', event => {
   if (event.button !== 0 || event.target.closest('.orbit-hub')) return;
   animation?.kill();
   animation = null;
-  dragging = { id: event.pointerId, startX: event.clientX, startY: event.clientY, angle: state.angle, lastX: event.clientX, lastTime: performance.now(), velocity: 0, moved: false };
+  dragging = { id: event.pointerId, startX: event.clientX, startY: event.clientY, angle: state.angle, pointerAngle: pointerAngle(event), turn: 0, lastTime: performance.now(), velocity: 0, moved: false, cardTouch: event.pointerType === 'touch' && Boolean(event.target.closest('.orbit-card')) };
   lastInteraction = performance.now();
 });
 listen(stage, 'pointermove', event => {
   if (!dragging || dragging.id !== event.pointerId) return;
   const dx = event.clientX - dragging.startX;
   const dy = event.clientY - dragging.startY;
-  if (!dragging.moved && Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 9) { dragging = null; return; }
-  if (!dragging.moved && Math.abs(dx) < 7) return;
-  if (!dragging.moved) { dragging.moved = true; stage.setPointerCapture(event.pointerId); stage.classList.add('is-dragging'); }
+  const currentAngle = pointerAngle(event);
+  const change = mod(currentAngle - dragging.pointerAngle + 180, 360) - 180;
+  dragging.pointerAngle = currentAngle;
+  dragging.turn += change;
+  if (!dragging.moved) {
+    if (!dragging.cardTouch && Math.abs(dy) > 12 && Math.abs(dy) > Math.abs(dx) * 1.4) { dragging = null; return; }
+    if (dragging.cardTouch ? Math.hypot(dx, dy) < 7 : Math.abs(dx) < 7 || Math.abs(dx) < Math.abs(dy) * .8) return;
+    dragging.moved = true;
+    stage.setPointerCapture(event.pointerId);
+    stage.classList.add('is-dragging');
+  }
   const now = performance.now();
-  dragging.velocity = (event.clientX - dragging.lastX) / Math.max(1, now - dragging.lastTime);
-  dragging.lastX = event.clientX;
+  dragging.velocity = dragging.velocity * .65 + change / Math.max(1, now - dragging.lastTime) * .35;
   dragging.lastTime = now;
-  state.angle = dragging.angle + dx / radius * 180 / Math.PI;
+  state.angle = dragging.angle + dragging.turn;
   render();
 });
 function finishDrag(event) {
@@ -215,13 +232,17 @@ function finishDrag(event) {
   if (gesture.moved) {
     suppressClickUntil = performance.now() + 400;
     const velocity = event.type === 'pointercancel' || performance.now() - gesture.lastTime > 100 ? 0 : gesture.velocity;
-    const projected = state.angle + Math.max(-step * 1.5, Math.min(step * 1.5, velocity * 20));
+    const projected = state.angle + Math.max(-step * 1.5, Math.min(step * 1.5, velocity * 110));
     rotateTo(Math.round(projected / step) * step, velocity);
   }
 }
 listen(stage, 'pointerup', finishDrag);
 listen(stage, 'pointercancel', finishDrag);
-listen(stage, 'lostpointercapture', finishDrag);
+// A touch card has implicit capture. Moving capture to the stage emits a
+// lostpointercapture event from the card; that is not the end of the drag.
+listen(stage, 'lostpointercapture', event => {
+  if (event.target === stage) finishDrag(event);
+});
 listen(stage, 'click', event => {
   if (performance.now() < suppressClickUntil) { event.preventDefault(); event.stopImmediatePropagation(); }
 }, { capture: true });
@@ -249,6 +270,7 @@ function openProduct(index, source) {
   bodyOverflow = document.body.style.overflow;
   document.body.style.overflow = 'hidden';
   dialog.showModal();
+  window.dispatchEvent(new CustomEvent('platform-product-open', { detail: { slug: productSlugs[index] } }));
   closingDialog = false;
   motion.play(dialog, { opacity: [0, 1], y: [16, 0], scale: [.98, 1] }, { duration: .35 });
 }
@@ -340,7 +362,7 @@ function emitWheelLeaves() {
     return;
   }
   const speed = Math.abs(angleDelta) / elapsed * 1000;
-  // A turn releases petals; a faster turn releases more.
+  // Turns produce a steady petal stream; faster turns raise its density.
   burstCredit = Math.min(5, burstCredit + Math.abs(angleDelta) * (.055 + Math.min(speed, 500) * .00016));
   while (burstCredit >= 1) {
     emitScrollLeaf(speed, Math.sign(angleDelta));
@@ -367,4 +389,16 @@ if (import.meta.hot) import.meta.hot.dispose(() => {
   stage.querySelector('.market-petals').classList.remove('petals-started');
   document.body.classList.remove('market-motion-paused');
   wheel.replaceChildren(); tabs.replaceChildren();
+});
+
+window.addEventListener('platform-catalog-loaded', event => {
+  const products = event.detail?.products || [];
+  for (const [index, slug] of productSlugs.entries()) {
+    const product = products.find(item => item.slug === slug);
+    if (!product) continue;
+    const card = [...wheel.children].find(item => Number(item.dataset.product) === index);
+    if (!card) continue;
+    if (product.name) card.querySelector('.card-bottom strong').textContent = product.name;
+    if (product.image_path?.startsWith('https://')) { const art=card.querySelector('.card-art'); art.src=product.image_path; art.alt=`${product.name} product image`; }
+  }
 });

@@ -90,10 +90,10 @@
 /* Keep modal opening stable and touch interactions native. */
 html:has(.marketplace-page){scrollbar-gutter:stable}
 .marketplace-page button,.marketplace-page a{touch-action:manipulation}
-.marketplace-page .orbit-card{touch-action:pan-y}
+.marketplace-page .orbit-card{touch-action:none}
 .product-dialog{overscroll-behavior:contain}
 .preview-active>span,.detail-back>span,.footer-socials a>span:last-child{display:inline-block}
 
-/* Extra leaves emerge from the centre of the turning carousel. */
+/* Extra leaves are emitted at the same concealed origin when scrolling accelerates. */
 .market-scroll-leaf{position:absolute;left:50%;top:calc(var(--pivot,800px) - var(--orbit-radius,500px));color:var(--red);pointer-events:none;will-change:transform,opacity}
 .market-scroll-leaf svg{display:block;width:100%;height:auto}

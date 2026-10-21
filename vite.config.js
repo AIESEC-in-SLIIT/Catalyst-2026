@@ -12,5 +12,9 @@ export default defineConfig({
     input: {
     main: resolve(import.meta.dirname, 'index.html'),
     marketplace: resolve(import.meta.dirname, 'marketplace/index.html'),
+    checkout: resolve(import.meta.dirname, 'checkout/index.html'),
+    account: resolve(import.meta.dirname, 'account/index.html'),
+    admin: resolve(import.meta.dirname, 'admin/index.html'),
+    registrations: resolve(import.meta.dirname, 'registrations/index.html'),
   } } },
 });
