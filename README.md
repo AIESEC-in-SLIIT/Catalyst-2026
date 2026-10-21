@@ -1,42 +1,28 @@
 # CATALYST 2026
 
-The flagship Leadership Development Seminar by AIESEC in SLIIT.
-
-A responsive, crimson-and-cream site inspired by the supplied Japanese warrior reference. Features locally hosted fonts, an original SVG samurai, a scroll-controlled armor transformation, accessible motion controls, and an introduction to the Catalyst experience.
+The CATALYST site for AIESEC in SLIIT. The published home route shows an under-construction screen; `/marketplace/` is the live storefront preview. The shop presents five merch concepts with a touch and wheel controlled circular carousel, petals, motion controls, and product previews.
 
 ## Develop
 
-Requires Node.js 22.12 or newer. Install dependencies with `npm install`.
+Requires Node.js 22.12 or newer.
 
 ```sh
-npm install
+npm ci
 npm run dev
 ```
 
-Open http://localhost:5173. The home page is `index.html`; the marketplace is `marketplace.html`.
+Pages are explicit Vite entries: `/marketplace/`, `/checkout/`, `/account/`, `/registrations/`, and `/admin/`. The home page and presentation are in `index.html`, `styles.css`, and `src/hero.jsx`. Marketplace motion is in `src/marketplace.js` and `src/marketplace.css`. Supabase UI is in `src/platform/`.
 
-## Build
+Build with `npm run build`. The GitHub Pages workflow deploys `dist/` when `production` is pushed. In GitHub Settings → Pages, select **GitHub Actions** as the build source.
 
-```sh
-npm run build
-```
+## Supabase platform
 
-Upload the contents of `dist/` to a static host. Both pages use relative asset paths.
+Versioned SQL migrations in `supabase/migrations/` define the shop, manual bank transfer checkout, private receipt uploads, finance review, inventory reservations, collection, staff access, and registration/delegate records. The admin panel includes event overview, orders, payments, products, stock, registrations, delegates, tickets, forms, delegations, check-in, staff, settings, and audit history.
 
-For GitHub Pages, set **Settings → Pages → Build and deployment → Source** to
-**GitHub Actions**. The workflow builds and deploys `dist/` whenever the
-`production` branch is pushed, and can also be run manually from Actions.
+Copy `.env.example` to `.env.local` and add only the project URL and publishable key. The service role key must never be put in Vite or GitHub Pages variables. Production Pages builds read `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` from GitHub repository variables.
 
-## Content
+New projects seed five products with inactive, unpriced variants, zero stock, and checkout closed. Follow [the setup guide](docs/platform-plan.md) to apply migrations, enable auth delivery, add the first owner, configure prices, bank details and pickup, and schedule reservation expiry. Checkout cannot open without those steps. Order email delivery is reserved for a later phase; in-app order updates are already recorded.
 
-Jōkamachi intentionally contains only its title and shared navigation. No products, prices, ordering, or payment integration have been added. The homepage does not announce an unconfirmed 2026 date or venue.
+## Motion
 
-Edit content in the HTML files, presentation in `styles.css`, and the GSAP scroll sequence in `src/hero.jsx`. Illustration assets and fonts are served locally from `assets/`. Fonts: Anton and Barlow Condensed, distributed under the SIL Open Font License; see the license files in `assets/`.
-
-## Scroll transformation
-
-The React hero uses one GSAP timeline, pinned and scrubbed by ScrollTrigger. `src/Character.jsx` defines aligned vector layers and MorphSVG path targets. Hair, helmet base, facial features, and clothing morph through overlapping stages; local clips grow the horns, teeth, and neck guard. The pupils stay anchored, and the background typography moves upward with the scroll timeline. The final illustration scales by 4% around the nose. Scrolling backward reverses the same timeline.
-
-Timing uses a normalized 0–1 timeline in `src/hero.jsx`; individual shape timings live beside their paths in `src/Character.jsx`. Reduced-motion preferences and the static-view control show the finished illustration without pinning or extra scroll distance. React effect cleanup removes the timeline and pin on preference changes or unmount. Vite builds both HTML pages.
-
-Ambient eye blinks and drifting leaves run independently of scroll progress. Links, buttons, and accordion controls split diagonally as a katana sweeps across them, with a steel glint and expanding impact flash. Internal navigation follows after the 460ms sword strike; modified clicks retain native behavior. Reduced-motion preferences disable blinking, drifting leaves, and slicing.
+The React hero uses a scrubbed GSAP timeline and layered SVG artwork. The marketplace carousel accepts wheel, trackpad, touch, buttons, and product tabs. Touch gestures follow the ring angle, settle on a card, and emit petals according to rotation speed. Reduced-motion preferences disable ambient motion.

@@ -1,5 +1,6 @@
 import { gsap } from 'gsap';
 import './interactions.js';
+import './platform/embed.jsx';
 import { installShopMotion } from './shop-motion.js';
 import wristbands from '../assets/merch/wristbands.svg';
 import regular from '../assets/merch/regular.svg';
@@ -15,6 +16,7 @@ const products = [
   { name: 'STICKER PACK', tab: 'STICKERS', fit: 'LEAVE YOUR MARK.', image: stickers, background: '#d4b99b', ink: '#201b13', description: 'A collection of Catalyst-inspired marks for the things you take everywhere. Give your notebook, laptop, or everyday essentials a little character.' },
   { name: 'BUCKET HAT', tab: 'BUCKET HAT', fit: 'TOP OFF YOUR NEXT CHAPTER.', image: hat, background: '#c90038', ink: '#f1eadf', description: 'A finishing touch for your Catalyst collection. Take the Catalyst spirit beyond the conference and into your next adventure.' },
 ];
+const productSlugs = ['wristbands', 'regular-tee', 'oversized-tee', 'sticker-pack', 'bucket-hat'];
 const stage = document.querySelector('.orbit-stage');
 const wheel = document.querySelector('.orbit-wheel');
 const tabs = document.querySelector('.product-tabs');
@@ -44,7 +46,8 @@ let motion;
 const leafBursts = new Map();
 const petalHost = stage.querySelector('.market-petals');
 const burstArtwork = petalHost.querySelector('svg');
-let previousBurstScroll = window.scrollY;
+let previousWheelAngle = null;
+let previousWheelTime = 0;
 let burstCredit = 0;
 let burstSequence = 0;
 
@@ -87,13 +90,14 @@ function layout() {
   stage.style.setProperty('--card-height', `${height}px`);
   stage.style.setProperty('--pivot', `${pivot}px`);
   stage.style.setProperty('--hub-top', `${height + (mobile ? 65 : 72)}px`);
+  stage.style.setProperty('--orbit-radius', `${radius}px`);
   stage.style.setProperty('--guide-size', `${radius * 1.26}px`);
   stage.style.setProperty('--guide-top', `${pivot - radius * .63}px`);
   stage.style.height = `${height + (mobile ? 265 : 280)}px`;
   cards.forEach((card, slot) => {
     const angle = slot * step;
     const radians = angle * Math.PI / 180;
-    gsap.set(card, { xPercent: -50, yPercent: -50, x: Math.sin(radians) * radius, y: -Math.cos(radians) * radius, rotation: angle });
+    gsap.set(card, { xPercent: -50, yPercent: -50, x: Math.sin(radians) * radius, y: -Math.cos(radians) * radius, rotation: 0 });
   });
   render();
 }
@@ -114,10 +118,14 @@ function updateProduct(index) {
 }
 
 function render() {
+  emitWheelLeaves();
   setRotation(state.angle);
   const topSlot = mod(Math.round(-state.angle / step), slots);
   updateProduct(topSlot % products.length);
   cards.forEach((card, slot) => {
+    // Counter-rotate the cards against the wheel so the carousel turns while
+    // product artwork and type remain upright.
+    gsap.set(card, { rotation: -state.angle });
     const degrees = mod(slot * step + state.angle + 180, 360) - 180;
     const visible = Math.abs(degrees) < 95;
     const visibility = visible ? 'visible' : 'hidden';
@@ -139,7 +147,8 @@ function rotateTo(angle, velocity = 0) {
     animation = null;
     return;
   }
-  animation = gsap.to(state, { angle, duration: Math.min(1.3, .8 + Math.abs(velocity) * .002), ease: 'power3.out', onUpdate: render, onComplete: () => { animation = null; } });
+  const distance = Math.abs(angle - state.angle);
+  animation = gsap.to(state, { angle, duration: Math.min(.8, Math.max(.28, .25 + distance / step * .28)), ease: 'power2.out', onUpdate: render, onComplete: () => { animation = null; } });
 }
 function selectProduct(index) {
   const currentSlot = -state.angle / step;
@@ -180,25 +189,38 @@ listen(reducedMotion, 'change', () => {
 });
 listen(stage, 'pointerenter', event => { if (event.pointerType === 'mouse') hovering = true; });
 listen(stage, 'pointerleave', () => { hovering = false; });
+function pointerAngle(event) {
+  const rect = stage.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + Number.parseFloat(stage.style.getPropertyValue('--pivot'));
+  return Math.atan2(event.clientX - centerX, centerY - event.clientY) * 180 / Math.PI;
+}
 listen(stage, 'pointerdown', event => {
   if (event.button !== 0 || event.target.closest('.orbit-hub')) return;
   animation?.kill();
   animation = null;
-  dragging = { id: event.pointerId, startX: event.clientX, startY: event.clientY, angle: state.angle, lastX: event.clientX, lastTime: performance.now(), velocity: 0, moved: false };
+  dragging = { id: event.pointerId, startX: event.clientX, startY: event.clientY, angle: state.angle, pointerAngle: pointerAngle(event), turn: 0, lastTime: performance.now(), velocity: 0, moved: false, cardTouch: event.pointerType === 'touch' && Boolean(event.target.closest('.orbit-card')) };
   lastInteraction = performance.now();
 });
 listen(stage, 'pointermove', event => {
   if (!dragging || dragging.id !== event.pointerId) return;
   const dx = event.clientX - dragging.startX;
   const dy = event.clientY - dragging.startY;
-  if (!dragging.moved && Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 9) { dragging = null; return; }
-  if (!dragging.moved && Math.abs(dx) < 7) return;
-  if (!dragging.moved) { dragging.moved = true; stage.setPointerCapture(event.pointerId); stage.classList.add('is-dragging'); }
+  const currentAngle = pointerAngle(event);
+  const change = mod(currentAngle - dragging.pointerAngle + 180, 360) - 180;
+  dragging.pointerAngle = currentAngle;
+  dragging.turn += change;
+  if (!dragging.moved) {
+    if (!dragging.cardTouch && Math.abs(dy) > 12 && Math.abs(dy) > Math.abs(dx) * 1.4) { dragging = null; return; }
+    if (dragging.cardTouch ? Math.hypot(dx, dy) < 7 : Math.abs(dx) < 7 || Math.abs(dx) < Math.abs(dy) * .8) return;
+    dragging.moved = true;
+    stage.setPointerCapture(event.pointerId);
+    stage.classList.add('is-dragging');
+  }
   const now = performance.now();
-  dragging.velocity = (event.clientX - dragging.lastX) / Math.max(1, now - dragging.lastTime);
-  dragging.lastX = event.clientX;
+  dragging.velocity = dragging.velocity * .65 + change / Math.max(1, now - dragging.lastTime) * .35;
   dragging.lastTime = now;
-  state.angle = dragging.angle + dx / radius * 180 / Math.PI;
+  state.angle = dragging.angle + dragging.turn;
   render();
 });
 function finishDrag(event) {
@@ -210,24 +232,30 @@ function finishDrag(event) {
   if (gesture.moved) {
     suppressClickUntil = performance.now() + 400;
     const velocity = event.type === 'pointercancel' || performance.now() - gesture.lastTime > 100 ? 0 : gesture.velocity;
-    const projected = state.angle + Math.max(-step * 1.5, Math.min(step * 1.5, velocity * 20));
+    const projected = state.angle + Math.max(-step * 1.5, Math.min(step * 1.5, velocity * 110));
     rotateTo(Math.round(projected / step) * step, velocity);
   }
 }
 listen(stage, 'pointerup', finishDrag);
 listen(stage, 'pointercancel', finishDrag);
-listen(stage, 'lostpointercapture', finishDrag);
+// A touch card has implicit capture. Moving capture to the stage emits a
+// lostpointercapture event from the card; that is not the end of the drag.
+listen(stage, 'lostpointercapture', event => {
+  if (event.target === stage) finishDrag(event);
+});
 listen(stage, 'click', event => {
   if (performance.now() < suppressClickUntil) { event.preventDefault(); event.stopImmediatePropagation(); }
 }, { capture: true });
 listen(stage, 'dragstart', event => event.preventDefault());
-// Horizontal trackpad movement rotates the fan; vertical gestures keep native page scrolling.
+// Wheel and trackpad movement turn the carousel while the pointer is over it.
 listen(stage, 'wheel', event => {
-  if (Math.abs(event.deltaX) <= Math.abs(event.deltaY) || Math.abs(event.deltaX) < 1) return;
+  const distance = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+  if (Math.abs(distance) < 1) return;
   event.preventDefault();
   animation?.kill(); animation = null;
   lastInteraction = performance.now();
-  state.angle -= event.deltaX * .07;
+  const pixels = distance * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? stage.clientHeight : 1);
+  state.angle -= Math.max(-120, Math.min(120, pixels)) * .18;
   render();
 }, { passive: false });
 
@@ -242,6 +270,7 @@ function openProduct(index, source) {
   bodyOverflow = document.body.style.overflow;
   document.body.style.overflow = 'hidden';
   dialog.showModal();
+  window.dispatchEvent(new CustomEvent('platform-product-open', { detail: { slug: productSlugs[index] } }));
   closingDialog = false;
   motion.play(dialog, { opacity: [0, 1], y: [16, 0], scale: [.98, 1] }, { duration: .35 });
 }
@@ -317,26 +346,30 @@ function emitScrollLeaf(speed, scrollDirection) {
     .to(leaf, { opacity: .8, duration: .3 }, 0)
     .to(leaf, { opacity: 0, duration: 1.1 }, duration - 1.1);
 }
-function updateScrollBursts(delta) {
-  const scrollPosition = window.scrollY;
-  const distance = scrollPosition - previousBurstScroll;
-  previousBurstScroll = scrollPosition;
-  if (!inView || document.hidden || paused || reducedMotion.matches || dialog.open || delta > 100) {
-    burstCredit = 0;
+function emitWheelLeaves() {
+  const now = performance.now();
+  if (previousWheelAngle === null) {
+    previousWheelAngle = state.angle;
+    previousWheelTime = now;
     return;
   }
-  const seconds = Math.max(delta, 1) / 1000;
-  const speed = Math.abs(distance) / seconds;
-  // Emission rises with actual scroll velocity in either direction, then stops at rest.
-  if (speed < 80) return;
-  burstCredit = Math.min(3, burstCredit + Math.min(24, speed / 65) * seconds);
+  const angleDelta = state.angle - previousWheelAngle;
+  const elapsed = Math.max(16, now - previousWheelTime);
+  previousWheelAngle = state.angle;
+  previousWheelTime = now;
+  if (!inView || document.hidden || paused || reducedMotion.matches || dialog.open || Math.abs(angleDelta) < .12) {
+    if (!inView || document.hidden || paused || reducedMotion.matches || dialog.open) burstCredit = 0;
+    return;
+  }
+  const speed = Math.abs(angleDelta) / elapsed * 1000;
+  // Turns produce a steady petal stream; faster turns raise its density.
+  burstCredit = Math.min(5, burstCredit + Math.abs(angleDelta) * (.055 + Math.min(speed, 500) * .00016));
   while (burstCredit >= 1) {
-    emitScrollLeaf(speed, Math.sign(distance));
+    emitScrollLeaf(speed, Math.sign(angleDelta));
     burstCredit -= 1;
   }
 }
 function tick(_time, delta) {
-  updateScrollBursts(delta);
   updatePetalScroll(delta);
   if (!inView || document.hidden || paused || hovering || dragging || animation || dialog.open || stage.contains(document.activeElement) || performance.now() - lastInteraction < 3000) return;
   state.angle -= Math.min(delta, 50) * .0025;
@@ -356,4 +389,16 @@ if (import.meta.hot) import.meta.hot.dispose(() => {
   stage.querySelector('.market-petals').classList.remove('petals-started');
   document.body.classList.remove('market-motion-paused');
   wheel.replaceChildren(); tabs.replaceChildren();
+});
+
+window.addEventListener('platform-catalog-loaded', event => {
+  const products = event.detail?.products || [];
+  for (const [index, slug] of productSlugs.entries()) {
+    const product = products.find(item => item.slug === slug);
+    if (!product) continue;
+    const card = [...wheel.children].find(item => Number(item.dataset.product) === index);
+    if (!card) continue;
+    if (product.name) card.querySelector('.card-bottom strong').textContent = product.name;
+    if (product.image_path?.startsWith('https://')) { const art=card.querySelector('.card-art'); art.src=product.image_path; art.alt=`${product.name} product image`; }
+  }
 });
