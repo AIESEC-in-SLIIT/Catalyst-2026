@@ -1,6 +1,6 @@
 # CATALYST 2026
 
-The CATALYST site for AIESEC in SLIIT. The published home route shows an under-construction screen; `/marketplace/` is the live storefront preview. The shop presents five merch concepts with a touch and wheel controlled circular carousel, petals, motion controls, and product previews.
+The CATALYST site for AIESEC in SLIIT. The home route presents the leadership experience and animated hero; `/marketplace/` is the live storefront preview. The shop presents five merch concepts with a touch and wheel controlled circular carousel, petals, motion controls, and product previews.
 
 ## Develop
 

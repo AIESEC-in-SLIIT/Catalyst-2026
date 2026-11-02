@@ -58,25 +58,6 @@
 .reduced-scene .drifting-leaves{display:none}
 
 
-/* Temporary public holding page; marketplace remains available from its single route. */
-.nav-status{display:flex;justify-content:center;align-items:center;font:700 clamp(14px,1.45vw,21px) Barlow,sans-serif;letter-spacing:.12em}
-.construction-screen{height:calc(100svh - var(--nav));min-height:620px;position:relative;overflow:hidden;display:grid;place-items:center}
-.construction-copy{text-align:center;position:relative;z-index:2;padding:32px 18px 56px}
-.construction-copy>.eyebrow{font-size:11px;letter-spacing:.2em}
-.construction-copy h1{font:400 clamp(88px,15vw,205px)/.83 Anton,Impact,sans-serif;letter-spacing:-.035em;margin:28px 0 26px}
-.construction-copy h1 span{color:#201b13}
-.construction-note{font:13px/1.8 Arial,sans-serif;letter-spacing:.01em}
-.construction-mark{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;opacity:.14;pointer-events:none}
-.construction-mark img{width:min(43vw,490px);height:auto;animation:mark-turn 38s linear infinite}
-.construction-mark>span{position:absolute;place-self:center;font:700 clamp(20px,3vw,42px) Arial,sans-serif;color:var(--red);writing-mode:vertical-rl}
-.construction-market{display:inline-flex;align-items:center;gap:22px;border:1px solid var(--cream);padding:15px 23px;margin-top:10px;font:700 15px Barlow,sans-serif;letter-spacing:.09em;transition:background .2s,color .2s}
-.construction-market:hover{background:var(--cream);color:var(--red)}
-.construction-market span{font:24px Arial,sans-serif}
-.construction-page footer{border-top-color:var(--line)}
-@keyframes mark-turn{to{transform:rotate(360deg)}}
-@media(max-width:650px){.construction-screen{min-height:600px}.nav-status{font-size:10px;letter-spacing:.04em}.construction-copy h1{font-size:24vw}.construction-copy>.eyebrow{font-size:9px}.construction-note{font-size:11px}.construction-market{font-size:13px}}
-@media(prefers-reduced-motion:reduce){.construction-mark img{animation:none}}
-
 /* Shared footer with a cream logo treatment on the theme’s ink background. */
 footer.site-footer{display:block;padding:55px 5% 22px;background:var(--ink);color:var(--cream);border-top:1px solid #f1eadf30;font-size:12px}
 .footer-main{display:grid;grid-template-columns:1fr 1fr;gap:60px;padding-bottom:38px}
