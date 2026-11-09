@@ -10,6 +10,8 @@ gsap.registerPlugin(ScrollTrigger, MorphSVGPlugin);
 
 function Hero() {
   const scene = useRef(null);
+  const musicRef = useRef(null);
+  const [musicPlaying, setMusicPlaying] = useState(false);
   const [systemReduced, setSystemReduced] = useState(() => matchMedia('(prefers-reduced-motion: reduce)').matches);
   const [manualReduced, setManualReduced] = useState(false);
   const reduced = systemReduced || manualReduced;
@@ -19,6 +21,50 @@ function Hero() {
     media.addEventListener('change', update);
     return () => media.removeEventListener('change', update);
   }, []);
+
+  useEffect(() => {
+    const button = document.querySelector('.motion-toggle');
+    const audio = musicRef.current;
+    if (!button || !audio) return;
+
+    let hovered = false;
+    let scrollSteps = 0;
+    let lastScrollY = window.scrollY;
+    let lastScrollAt = 0;
+    const playOnSecondDownwardScroll = async () => {
+      const scrollY = window.scrollY;
+      const now = performance.now();
+      const movedDown = scrollY > lastScrollY + 8;
+      lastScrollY = scrollY;
+      if (!hovered || !movedDown || now - lastScrollAt < 100) return;
+      lastScrollAt = now;
+      scrollSteps += 1;
+      if (scrollSteps < 2) return;
+      scrollSteps = 0;
+      try {
+        await audio.play();
+        setMusicPlaying(true);
+      } catch (error) {
+        console.warn('Could not play the music track', error);
+      }
+    };
+    const handleEnter = () => { hovered = true; scrollSteps = 0; lastScrollY = window.scrollY; };
+    const handleLeave = () => { hovered = false; scrollSteps = 0; };
+    const handleEnded = () => setMusicPlaying(false);
+    const handlePause = () => setMusicPlaying(false);
+    button.addEventListener('mouseenter', handleEnter);
+    button.addEventListener('mouseleave', handleLeave);
+    window.addEventListener('scroll', playOnSecondDownwardScroll, { passive: true });
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('pause', handlePause);
+    return () => {
+      button.removeEventListener('mouseenter', handleEnter);
+      button.removeEventListener('mouseleave', handleLeave);
+      window.removeEventListener('scroll', playOnSecondDownwardScroll);
+      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('pause', handlePause);
+    };
+  }, [systemReduced]);
 
   useLayoutEffect(() => {
     let active = true;
@@ -102,7 +148,8 @@ function Hero() {
         <div className="hero-progress" aria-hidden="true"/>
       </div>
     </section>
-    {!systemReduced && <button className="motion-toggle" type="button" aria-label={manualReduced ? 'Enable scroll animation' : 'Show static samurai'} aria-pressed={manualReduced} onClick={() => setManualReduced(value => !value)}><span aria-hidden="true">{manualReduced ? '▷' : 'Ⅱ'}</span></button>}
+    <audio ref={musicRef} src="/assets/RiveR%20-%20Solo.mp3" preload="none" />
+    <button className={`motion-toggle${musicPlaying ? ' music-playing' : ''}`} type="button" aria-label={musicPlaying ? 'Music playing; click to toggle the scroll animation' : 'Music control; hover and scroll down twice to play'} aria-pressed={manualReduced} onClick={() => setManualReduced(value => !value)}><span aria-hidden="true">{musicPlaying ? '♫' : '♪'}</span></button>
   </>;
 }
 createRoot(document.getElementById('hero-root')).render(<Hero />);
